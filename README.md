@@ -1,5 +1,7 @@
 # Node-Robust-Authentication System
 
+![project-image](https://res.cloudinary.com/cocoder/image/upload/v1750710905/Projects/node-js-robust-auth/a6acc931-3da9-41f3-9baf-6c5223876be8.png)
+
 A comprehensive, production-ready authentication microservice built with modern security practices, scalability, and developer experience in mind. This system replicates and enhances the functionality offered by modern authentication providers like Clerk.dev.
 
 ## 🚀 Features
