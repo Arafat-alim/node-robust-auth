@@ -1,8 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server/$1" },
-    { "source": "/(.*)", "destination": "/src/$1" }
-  ],
   "builds": [
     {
       "src": "server/src/index.js",
@@ -11,7 +7,7 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "/server/src/index.js"
     }
   ]
