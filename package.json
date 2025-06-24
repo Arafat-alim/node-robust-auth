@@ -2,6 +2,15 @@
   "name": "node-robust-authentication-system",
   "private": true,
   "version": "1.0.0",
+  "description": "Microservice: Node.js Authentication Inspired by Clerk",
+  "author": "Arafat Aman Alim <dev.arafat.alim.gmail.com>",
+  "keywords": [
+    "mern",
+    "node-robust-auth",
+    "2fa-authenticator",
+    "saas",
+    "full stack engineer"
+  ],
   "type": "module",
   "engines": {
     "node": "20.x"
