@@ -35,23 +35,19 @@ app.use(
   })
 );
 
-// Rate limiting (adjust this if you only want to apply it to a specific sub-path after /api/)
-// For example, if you want it only for /api/auth, then `app.use("/auth", rateLimiter)` after fixing the routes
-app.use("/auth", rateLimiter); // Change from /api/auth
+// Rate limiting
+app.use("/api/auth", rateLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-// --- CHANGE THESE LINES ---
-app.use("/auth", authRoutes); // Was /api/auth
-app.use("/user", userRoutes); // Was /api/user
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 // Health check endpoint
-// --- CHANGE THIS LINE ---
-app.get("/health", (req, res) => {
-  // Was /api/health
+app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     message: "Node-Robust-Authentication System is running",
@@ -86,16 +82,11 @@ const connectDB = async () => {
 const startServer = async () => {
   await connectDB();
 
-  // For Vercel, this app.listen block will NOT run.
-  // The `export default app;` handles the serverless function execution.
-  // This block is only for local development.
-  if (process.env.NODE_ENV !== "production") {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/api/health`); // Keep /api/health for local testing
-    });
-  }
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  });
 };
 
 startServer();
