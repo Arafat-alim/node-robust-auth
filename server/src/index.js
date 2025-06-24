@@ -52,7 +52,7 @@ app.get("/api/health", (req, res) => {
     status: "OK",
     message: "Node-Robust-Authentication System is running",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development", // Default to development if not set
+    environment: process.env.NODE_ENV || "development",
   });
 });
 
@@ -67,43 +67,85 @@ app.use("*", (req, res) => {
   });
 });
 
-// Database connection
+// Database connection - modified for serverless compatibility
+let isConnected = false;
+let dbConnection = null;
+
 const connectDB = async () => {
+  if (isConnected && dbConnection) {
+    console.log("Using existing database connection");
+    return dbConnection;
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Creating new database connection");
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 30000,
+    });
+
+    isConnected = true;
+    dbConnection = conn;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    return conn;
   } catch (error) {
     console.error("Database connection failed:", error.message);
-    process.exit(1); // Exit with a non-zero code to indicate an error
+    throw error;
   }
 };
 
-// Start server
-const startServer = async () => {
-  await connectDB();
+// Serverless-specific export
+const handler = async (req, res) => {
+  try {
+    // Ensure database connection exists
+    await connectDB();
 
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  });
+    // Forward the request to Express
+    return app(req, res);
+  } catch (error) {
+    console.error("Serverless handler error:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
 };
 
-startServer();
+// Export for serverless use
+export default handler;
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM received. Shutting down gracefully...");
-  await mongoose.disconnect(); // Disconnect Mongoose
-  console.log("MongoDB disconnected.");
-  process.exit(0);
-});
+// Local development server - only start if not in serverless environment
+if (process.env.VERCEL !== "1") {
+  (async () => {
+    try {
+      await connectDB();
+      app.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+        console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+        console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+      });
+    } catch (error) {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    }
+  })();
+}
 
-process.on("SIGINT", async () => {
-  console.log("SIGINT received. Shutting down gracefully...");
-  await mongoose.disconnect(); // Disconnect Mongoose
-  console.log("MongoDB disconnected.");
-  process.exit(0);
-});
+// Graceful shutdown - only relevant for local development
+if (process.env.VERCEL !== "1") {
+  process.on("SIGTERM", async () => {
+    console.log("SIGTERM received. Shutting down gracefully...");
+    await mongoose.disconnect();
+    console.log("MongoDB disconnected.");
+    process.exit(0);
+  });
 
-export default app;
+  process.on("SIGINT", async () => {
+    console.log("SIGINT received. Shutting down gracefully...");
+    await mongoose.disconnect();
+    console.log("MongoDB disconnected.");
+    process.exit(0);
+  });
+}
