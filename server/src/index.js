@@ -105,3 +105,5 @@ process.on("SIGINT", async () => {
   console.log("MongoDB disconnected.");
   process.exit(0);
 });
+
+export default app;
