@@ -2,7 +2,7 @@
   "name": "node-robust-authentication-system",
   "private": true,
   "version": "1.0.0",
-  "description": "Microservice: Node.js Authentication Inspired by Clerk",
+  "description": "Microservice: Node.js Authentication Inspired by Clerk.",
   "author": "Arafat Aman Alim <dev.arafat.alim.gmail.com>",
   "keywords": [
     "mern",
@@ -24,7 +24,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "postinstall": "cd server && npm install",
-    "vercel-build": "vercel build"
+    "vercel-build": "echo Hello"
   },
   "dependencies": {
     "axios": "^1.6.0",
